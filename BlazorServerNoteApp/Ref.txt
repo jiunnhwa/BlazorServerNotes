@@ -1,0 +1,38 @@
+﻿https://youtu.be/OW6OfW5SkNw	Intro To Azure Static Web Apps - Free Hosting, SSL, Global Distribution, and More<IAmTimCorey>
+
+https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
+https://docs.microsoft.com/en-us/ef/core/modeling/
+https://docs.microsoft.com/en-us/ef/core/modeling/data-seeding
+https://docs.microsoft.com/en-us/ef/core/managing-schemas/ensure-created
+https://www.learnentityframeworkcore.com/migrations/commands/cli-commands
+https://www.learnentityframeworkcore.com/query-types
+
+
+[STEPS]
+#1	INSTALLS
+	cd ./Project
+	dotnet tool install --global dotnet-ef
+	dotnet tool update --global dotnet-ef
+	dotnet add package Microsoft.EntityFrameworkCore.Design
+	dotnet add package Microsoft.EntityFrameworkCore
+	dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+
+	dotnet add package HtmlAgilityPack
+
+	PM>Install-Package HtmlAgilityPack.NetCore -Version 1.5.0.1
+
+
+	SETUP DATABASE
+	create /Model, /Data/DBContext
+	dotnet ef migrations add "First Migrations" -o "Data/Migrations"  (Done. To undo this action, use 'ef migrations remove' )
+	dotnet ef database update			generate the database
+	---
+	update class: add CreatedTimestamp
+	dotnet ef migrations add AddNoteCreatedTimestamp
+
+[HTML]
+#2 
+	A). Amend Index.razor
+	B). Add custom scripts
+    Add custom script in Pages/_Layout.cshtml after section <script src="_framework/blazor.server.js"></script>
+	C). Add Create.razor, Uodate.razor, List.razor in /View

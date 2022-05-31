@@ -1,0 +1,144 @@
+﻿@page "/create"
+@using BlazorServerNoteApp.Data
+@using Microsoft.EntityFrameworkCore
+
+<h1>Creating Note "@item.Title"</h1>
+<br />
+<button @onclick="() => PreFill()" class="btn btn-primary">PreFill</button>
+<EditForm Model="item" OnValidSubmit="CreatePostAsync">
+
+    <div class="form-group mb-3">
+    <label for="itemURL">URL</label>
+    <InputText @bind-Value="item.URL" class="form-control" id="itemURL" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemCategory">Category</label>
+        <InputSelect @bind-Value="item.Category" class="form-control" id="itemCategory">
+        @if (categories != null)
+        {
+            foreach (var thing in categories)
+            {
+                <option>@thing</option>
+            }
+        }
+        </InputSelect>
+     </div>
+
+    <div class="form-group mb-3">
+        <label for="itemCategoryPath">CategoryPath</label>
+        <InputSelect @bind-Value="item.CategoryPath" class="form-control" id="itemCategoryPath">
+        @if (folders != null)
+        {
+            foreach (var thing in folders)
+            {
+                <option>@thing</option>
+            }
+        }
+        </InputSelect>
+     </div>
+
+    <div class="form-group mb-3">
+        <label for="itemTitle">Title</label>
+        <InputText @bind-Value="item.Title" class="form-control" id="itemTitle" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemContent">Content</label>
+        <InputTextArea rows="3" @bind-Value="item.Content" class="form-control" id="itemContent" />
+    </div>
+    <div class="form-group mb-3">
+        <label for="itemDescription">Description</label>
+        <InputTextArea rows="4" @bind-Value="item.Description" class="form-control" id="itemDescription" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemRemark">Remark</label>
+        <InputTextArea rows="4" @bind-Value="item.Remark" class="form-control" id="itemRemark" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemTags">Tags</label>
+        <InputText @bind-Value="item.Tags" class="form-control" id="itemTags" />
+    </div>
+
+
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button class="btn btn-success" type="submit">Create    </button>
+    <button @onclick="@(() => NavigationManager.NavigateTo("/List"))" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@code {
+
+    private List<string> categories = new() { "DEV", "FINANCE", "HEALTH", "JOBS", "UI", "KUNGFU", "OTHERS", "SCANDAL"} ;
+    private List<string> folders = new() 
+    { 
+        //--
+        "money/stocks/US",
+        "money/stocks/oil",
+        //-
+        "BootStrap", 
+        //-
+        "Dev", 
+        "Dev/golang/architecture/clean",
+        "Dev/templates/bootstrap", 
+        //-
+        "FINANCE", 
+        //--
+        "Health",
+        "Health/TCM",
+        //--
+        "covid",
+        "covid/studies",
+        "covid/remedy",
+        //--
+        "JOBS",
+        "jobs/remote",
+
+    };
+    private Note item = new Note
+        {
+            Title = "Title",
+            Content = "Content",
+           // CreatedAt = DateTime.Now
+    };
+
+    private async Task CreatePostAsync()
+    {
+
+        item.CreatedAt = DateTime.Now;
+        //item.Category = item.GetCategoryFromPath(); //item.CategoriesPath.Split(' ')[0];            
+			if (string.IsNullOrEmpty(item.Category))
+			{
+				if (!string.IsNullOrEmpty(item.CategoryPath))
+				{
+					item.Category = item.CategoryPath.Split('/')[0];
+				}
+			}
+        using var context = new NoteDBContext();
+        await context.Notes.AddAsync(item);
+
+        if (await context.SaveChangesAsync() > 0)
+        {
+            NavigationManager.NavigateTo("/List");
+        }
+        else
+        {
+            string errorMessage = "ERROR: Failed to create Note.";
+            await JsRuntime.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+
+    private async Task PreFill()
+    {
+        item = GetMetaValues( item.URL);
+    }
+}

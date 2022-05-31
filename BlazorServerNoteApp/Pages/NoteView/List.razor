@@ -1,0 +1,80 @@
+﻿@page "/List"
+@using BlazorServerNoteApp.Data
+@using BlazorServerNoteApp.Model
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>List of Notes</PageTitle>
+
+<h1>List of All notes.</h1>
+
+<a href="/create" class="btn btn-success btn-lg w-100 my-4">+ Create(Empty)</a>
+
+
+<table class="table table-responsive ">
+@*    <thead>
+        <tr>
+            <th scope="col">RID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Content</th>
+            <th scope="col">Description</th>
+            <th scope="col">Remark</th>
+            <th scope="col">Tags</th>
+            <th scope="col">URL</th>
+
+            <th scope="col">Action</th>
+        </tr>
+    </thead>*@
+    <tbody>
+        @if (items != null)
+        {
+            foreach (var item in items)
+            {
+                <tr>
+                    <td>
+                        <p><b>@item.Title</b></p>
+                        <p style="background-color:HoneyDew">@item.Content</p>
+                        <p style="background-color:HoneyDew">@item.Description</p>
+                        <p style="background-color:Gold">@item.Tags</p>
+                    </td>
+
+                    <td>
+                        <a href="/update/@item.RID" class="btn btn-warning btn-lg w-100 my-2">
+                            Update
+                        </a>
+                        <button @onclick="() => DeletePostAsync(item)" class="btn btn-danger btn-lg w-100 my-2">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+
+            }
+        }
+    </tbody>
+</table>
+
+@inject IJSRuntime JsRuntime
+@code {
+    private List<Note> items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = new NoteDBContext();
+        items = (await context.Notes.ToListAsync()).OrderByDescending(x => x.RID).ToList();
+    }
+
+    private async Task DeletePostAsync(Note item)
+    {
+        using var context = new NoteDBContext();
+        context.Notes.Remove(item);
+
+        if (await context.SaveChangesAsync() > 0)
+        {
+            items.Remove(item);
+        }
+        else
+        {
+            string errorMessage = $"ERROR: Failed to delete post \"{item.Title}\"";
+            await JsRuntime.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+}

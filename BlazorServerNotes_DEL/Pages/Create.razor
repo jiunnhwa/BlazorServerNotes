@@ -1,0 +1,90 @@
+﻿@page "/create"
+
+
+<h1>Creating Note "@item.Title"</h1>
+
+<button @onclick="() => PreFill()" class="btn btn-primary">PreFill</button>
+<EditForm Model="item" OnValidSubmit="CreatePostAsync">
+
+        <div class="form-group mb-3">
+        <label for="itemURL">URL</label>
+        <InputText @bind-Value="item.URL" class="form-control" id="itemURL" />
+        
+    </div>
+
+
+    <div class="form-group mb-3">
+        <label for="itemTitle">Title</label>
+        <InputText @bind-Value="item.Title" class="form-control" id="itemTitle" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemContent">Content</label>
+        <InputText @bind-Value="item.Content" class="form-control" id="itemContent" />
+    </div>
+    <div class="form-group mb-3">
+        <label for="itemDescription">Description</label>
+        <InputText @bind-Value="item.Description" class="form-control" id="itemDescription" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemRemark">Remark</label>
+        <InputText @bind-Value="item.Remark" class="form-control" id="itemRemark" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="itemTags">Tags</label>
+        <InputText @bind-Value="item.Tags" class="form-control" id="itemTags" />
+    </div>
+
+
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button class="btn btn-success" type="submit">Create    </button>
+    <button @onclick="@(() => NavigationManager.NavigateTo("/List"))" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@code {
+    private Note item = new Note
+        {
+            Title = "Title",
+            Content = "Content",
+            CreatedAt = DateTime.Now
+    };
+
+    private async Task CreatePostAsync()
+    {
+        using var context = new NoteDBContext();
+        await context.Notes.AddAsync(item);
+
+        if (await context.SaveChangesAsync() > 0)
+        {
+            NavigationManager.NavigateTo("/List");
+        }
+        else
+        {
+            string errorMessage = "ERROR: Failed to create Note.";
+            await JsRuntime.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+
+    private async Task PreFill()
+    {
+        Console.WriteLine("prefill create");
+        item = GetMetaValues( item.URL);
+        Console.WriteLine(item.Title + " "  + item.Description);
+        //await CreatePostAsync();
+
+        //item.Remark = GetMetaTagValue( "https://www.hanselman.com/blog/blazor-webassembly-on-azure-static-web-apps");
+
+        //Console.WriteLine(item.Remark + " "  + item.Remark);
+        //StateHasChanged();
+    }
+}

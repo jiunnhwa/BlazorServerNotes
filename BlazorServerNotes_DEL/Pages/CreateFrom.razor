@@ -1,0 +1,62 @@
+﻿@page "/CreateFrom"
+
+<h3>CreateFrom</h3>
+
+
+<h1>Creating Note "@item.Title"</h1>
+
+
+<EditForm Model="item" >
+
+    <div class="form-group mb-3">
+        <label for="itemURL">URL</label>
+        <InputText @bind-Value="item.URL" class="form-control" id="itemURL" />
+        
+    </div>
+
+
+    
+<button @onclick="() => PreFill()" class="btn btn-success">PreFill</button>    
+    <button @onclick="@(() => NavigationManager.NavigateTo("/List"))" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+
+
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@code {
+    private Note item = new Note
+        {
+            Title = "Title",
+            Content = "Content",
+            CreatedAt = DateTime.Now
+    };
+
+    private async Task CreatePostAsync()
+    {
+        using var context = new NoteDBContext();
+        await context.Notes.AddAsync(item);
+
+        if (await context.SaveChangesAsync() > 0)
+        {
+            NavigationManager.NavigateTo("/List");
+        }
+        else
+        {
+            string errorMessage = "ERROR: Failed to create Note.";
+            await JsRuntime.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+
+    private async Task PreFill()
+    {
+        Console.WriteLine("prefill");
+        item = GetMetaValues( item.URL);
+        Console.WriteLine(item.Title + " "  + item.Description);
+        await CreatePostAsync();
+        
+        //StateHasChanged();
+    }
+}

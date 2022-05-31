@@ -1,0 +1,81 @@
+﻿@page "/"
+@using BlazorServerNoteApp.Data
+@using Microsoft.EntityFrameworkCore
+
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+<p>Welcome to News Umbrage.</p>
+
+
+
+    <div class="container-fluid">
+        
+    
+
+    <div class="container-fluid p-3 my-3" >
+        <div class="input-group mb-3" style="width: 75%">
+            <input class="form-control" type="search" placeholder="Enter a phrase or keyword..." aria-label="Filter" id="search-input" onkeyup="myFunc()" autofocus>
+             <div class="input-group-btn">
+                <button class="btn btn-outline-secondary" type="button" style="visibility: hidden;">Filter</button>
+            </div>
+        </div>
+        
+        <h6>Updated: Tue, 07 Dec 2021 15:19:13 &#43;08 <span class="badge bg-danger">100</span></h6>
+        <ul id="myList" name="newslist" class="list-group list-group-flush">
+
+        @if (items != null)
+        {
+            foreach (var item in items)
+            {
+            
+                <li>
+                    <details>
+                    <summary> <a target="_blank" rel="noopener noreferrer" href="@item.URL"><span  style="color:Blue; font-family:Verdana,Helvetica,sans-serif;">@item.Title</span></a></summary>
+                    <p>@item.Description</p>
+                    <p>@item.Remark</p>
+                    </details>
+                </li>                  
+            }        
+         }
+
+
+
+
+
+             
+        </ul>
+    </div>
+
+    </div>
+
+
+
+
+
+
+@code{
+    private List<Note> items = new();
+    //private List<string> items = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //items = BlazorServerNoteApp.Model.Note.LoadSampleData();
+
+        using var context = new NoteDBContext();
+        items = await context.Notes.ToListAsync();
+        items = (await context.Notes.ToListAsync()).OrderByDescending(x => x.RID)./*Take(10).*/ToList();
+
+    }
+
+
+
+}
+
+
+
+
+
+
